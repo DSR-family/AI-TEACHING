@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DSR AI 기초교육 3단계 실습</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --blue:#003087; --blue-mid:#1a4fa0; --blue-sky:#0ea5e9;
+    --blue-light:#e0f2fe; --blue-lighter:#f0f9ff; --blue-line:#bae6fd;
+    --bg:#ffffff; --surface:#f6f8fa; --text:#1f2328; --text-mid:#4b5563;
+    --text-sub:#6b7280; --border:#d1d9e0; --orange:#e8611a;
+    --gh-green:#1f883d; --gh-green-dark:#1a7f37; --gh-link:#0969da;
+    --gh-header:#24292f; --gh-muted:#59636e;
+    --sidebar-w:260px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Pretendard","Noto Sans KR",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;font-size:16px;word-break:keep-all;overflow-wrap:break-word;}
+
+  .topbar{position:sticky;top:0;z-index:200;height:48px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;}
+  .topbar-brand{font-size:16px;font-weight:900;color:var(--blue);white-space:nowrap;}
+  .topbar-brand span{color:var(--text-sub);font-weight:500;font-size:13px;margin-left:6px;}
+
+  .progress-header{position:sticky;top:48px;z-index:190;background:var(--bg);padding:14px 40px 16px;border-bottom:1px solid var(--border);}
+  .progress-info{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;font-weight:700;color:var(--blue);line-height:1;margin-bottom:10px;}
+  .progress-info span:last-child{color:var(--text-sub);font-weight:700;}
+  .progress-track{height:4px;background:var(--border);border-radius:999px;overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:var(--blue);border-radius:999px;transition:width 0.3s ease;}
+
+  .layout{display:flex;min-height:calc(100vh - 108px);}
+  .sidebar{width:var(--sidebar-w);flex-shrink:0;border-right:1px solid var(--border);padding:24px 0;position:sticky;top:108px;height:calc(100vh - 108px);overflow-y:auto;}
+  .sidebar-group{padding:6px 16px;font-size:12px;font-weight:700;color:var(--text-sub);letter-spacing:0.08em;margin-top:16px;}
+  .sidebar-link{display:block;padding:8px 16px 8px 24px;font-size:14.5px;color:var(--text);font-weight:600;border-left:2px solid transparent;transition:all 0.15s;cursor:pointer;background:none;border-right:none;border-top:none;border-bottom:none;width:100%;text-align:left;font-family:inherit;}
+  .sidebar-link:hover{color:var(--blue);background:var(--blue-lighter);}
+  .sidebar-link.active{color:var(--blue);font-weight:700;border-left-color:var(--blue);background:var(--blue-lighter);}
+  .sidebar-state{font-size:11px;font-weight:800;color:var(--gh-green);margin-left:6px;}
+  .sidebar-state.todo{color:#cf222e;}
+
+  .main{flex:1;min-width:0;display:flex;}
+  .article{flex:1;min-width:0;padding:28px 40px 70px;max-width:820px;}
+  .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-sub);margin-bottom:14px;flex-wrap:wrap;}
+  .breadcrumb span{color:var(--border);}
+  .article-title{font-size:30px;font-weight:900;color:var(--text);letter-spacing:-0.03em;line-height:1.2;margin-bottom:10px;}
+  .article-lead{font-size:17px;color:var(--text);line-height:1.75;max-width:720px;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border);font-weight:500;}
+  .section{margin-bottom:48px;}
+  .section-title{font-size:22px;font-weight:900;color:var(--text);letter-spacing:-0.02em;line-height:1.35;margin-bottom:14px;}
+  .body-text{font-size:16px;color:var(--text);line-height:1.9;}
+  .body-text p{margin-bottom:14px;}
+  .body-text p:last-child{margin-bottom:0;}
+  .required-notice{color:#9f1239 !important;font-weight:800 !important;}
+  .note{margin:20px 0;padding:12px 16px;border-left:3px solid var(--blue-sky);background:var(--blue-lighter);}
+  .note-label{font-size:12px;font-weight:700;color:var(--blue-mid);margin-bottom:4px;}
+  .note-alert{margin:14px 0;scroll-margin-top:118px;padding:13px 18px;border:2px solid var(--orange);border-radius:10px;background:#fff8e6;animation:notepulse 1.6s ease-out infinite;}
+  @keyframes notepulse{0%{box-shadow:0 0 0 0 rgba(232,97,26,.55);}70%{box-shadow:0 0 0 12px rgba(232,97,26,0);}100%{box-shadow:0 0 0 0 rgba(232,97,26,0);}}
+  .note-alert-label{font-size:12px;font-weight:900;color:var(--orange);margin-bottom:5px;letter-spacing:.04em;}
+  .note-alert p{font-size:15px;color:#7a4b00;line-height:1.7;font-weight:700;}
+  .note-alert p b{color:#5c3700;font-weight:900;}
+  .note p{font-size:15px;color:var(--blue-mid);line-height:1.8;font-weight:500;}
+
+  .intro-panel{max-width:820px;padding:12px 0 0;}
+  .intro-title{font-size:30px;font-weight:900;letter-spacing:-0.03em;line-height:1.2;margin-bottom:14px;}
+  .intro-lede p{font-size:15.5px;color:var(--text-mid);line-height:1.8;font-weight:500;margin-bottom:10px;}
+  .intro-stage-list{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch;margin:18px 0;}
+  .intro-stage-item{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;min-height:96px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:#fff;}
+  .intro-stage-item.current{background:linear-gradient(145deg,#eff8ff,#e0f2fe);border:2px solid var(--blue-sky);box-shadow:0 8px 24px rgba(14,165,233,0.16);}
+  .intro-stage-item.current::after{content:'현재 교육';position:absolute;right:12px;top:12px;padding:4px 8px;border-radius:999px;background:var(--blue);color:#fff;font-size:10.5px;font-weight:900;}
+  .intro-stage-arrow{display:flex;align-items:center;justify-content:center;color:var(--blue-sky);font-size:25px;font-weight:900;}
+  .intro-stage-num{width:28px;height:28px;border-radius:50%;background:#cbd5e1;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;}
+  .intro-stage-item.current .intro-stage-num{background:var(--blue);}
+  .intro-stage-text{font-size:14.5px;font-weight:900;line-height:1.4;}
+  .intro-stage-sub{display:block;margin:4px 0 0;font-size:12.5px;font-weight:600;color:var(--text-sub);}
+  .flow-list{display:flex;flex-direction:column;gap:7px;margin:16px 0 4px;}
+  .flow-item{display:flex;gap:11px;align-items:center;padding:10px 14px;border:1px solid var(--border);border-radius:9px;background:var(--surface);}
+  .flow-num{width:23px;height:23px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .flow-text{font-size:14.5px;line-height:1.6;}
+  .flow-text b{font-weight:800;}
+
+  /* ===== 상황 판단 ===== */
+  .judge-card{border:1px solid var(--border);border-radius:12px;background:#fff;margin:22px 0;overflow:hidden;}
+  .judge-head{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);font-size:14px;font-weight:800;color:var(--text-mid);}
+  .judge-body{padding:22px;}
+  .claude-popup{border:1px solid var(--border);border-radius:10px;background:#fff;box-shadow:0 4px 16px rgba(15,23,42,.08);overflow:hidden;}
+  .claude-popup-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#1f2328;color:#fff;font-size:12px;font-weight:700;}
+  .claude-dot{width:9px;height:9px;border-radius:50%;background:var(--orange);}
+  .claude-popup-body{padding:18px 20px;}
+  .claude-ask{font-size:16px;font-weight:800;line-height:1.6;margin-bottom:12px;}
+  .claude-cmd{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--blue-mid);background:var(--blue-lighter);border:1px solid var(--blue-line);border-radius:6px;padding:9px 12px;margin-bottom:14px;word-break:break-all;}
+  .claude-ctx{font-size:13.5px;color:var(--text-mid);line-height:1.7;}
+  .judge-opts{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px;}
+  .judge-opt{flex:1;min-width:150px;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:inherit;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;transition:all .15s;}
+  .judge-opt:hover:not(:disabled){border-color:var(--blue-sky);background:var(--blue-lighter);}
+  .judge-opt:disabled{cursor:default;opacity:.55;}
+  .judge-opt.picked-right{border-color:#86efac;background:#f0fdf4;color:#166534;opacity:1;}
+  .judge-opt.picked-wrong{border-color:#fda4af;background:#fff1f2;color:#9f1239;opacity:1;}
+  .judge-opt.reveal-right{border-color:#86efac;background:#f0fdf4;color:#166534;opacity:1;}
+  .judge-feedback{display:none;margin-top:16px;padding:16px 18px;border-radius:10px;font-size:14.5px;line-height:1.85;}
+  .judge-feedback.show{display:block;}
+  .judge-feedback.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;}
+  .judge-feedback.no{background:#fff1f2;border:1px solid #fecdd3;color:#9f1239;}
+  .judge-feedback b{font-weight:900;}
+  .judge-retry{margin-top:10px;padding:7px 14px;border-radius:7px;border:1px solid currentColor;background:transparent;color:inherit;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;}
+
+  /* ===== GitHub 시뮬레이터 ===== */
+  .sim-steps{display:flex;gap:8px;margin:14px 0 12px;flex-wrap:wrap;}
+  .sim-step{flex:1;min-width:120px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12.5px;font-weight:700;color:var(--text-sub);text-align:center;}
+  .sim-step.active{border-color:var(--blue);background:var(--blue);color:#fff;}
+  .sim-step.done{border-color:var(--gh-green);background:#f0fdf4;color:var(--gh-green-dark);}
+
+  .browser{border:1px solid #b9c0c8;border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.13);background:#fff;}
+  .browser-chrome{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#e9edf1;border-bottom:1px solid #cfd6dd;}
+  .browser-dots{display:flex;gap:6px;}
+  .browser-dots i{width:11px;height:11px;border-radius:50%;display:block;}
+  .browser-url{flex:1;background:#fff;border:1px solid #cfd6dd;border-radius:999px;padding:5px 14px;font-size:12.5px;color:var(--gh-muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .gh-header{display:flex;align-items:center;gap:10px;padding:12px 18px;background:var(--gh-header);color:#fff;}
+  .gh-logo{width:26px;height:26px;border-radius:50%;background:#fff;color:var(--gh-header);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;}
+  .gh-header-path{font-size:13.5px;font-weight:600;color:#e6edf3;}
+  .gh-header-path b{font-weight:800;color:#fff;}
+  .gh-avatar{margin-left:auto;width:26px;height:26px;border-radius:50%;background:#57606a;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .gh-screen{padding:26px 28px 30px;background:#fff;}
+  .gh-h1{font-size:23px;font-weight:400;color:var(--text);padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:22px;}
+  .gh-field{margin-bottom:18px;}
+  .gh-label{display:block;font-size:13.5px;font-weight:800;color:var(--text);margin-bottom:6px;}
+  .gh-help{font-size:12.5px;color:var(--gh-muted);line-height:1.6;margin-top:6px;}
+  .gh-input{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font:inherit;font-size:14.5px;background:#fff;color:var(--text);}
+  .gh-input:focus{outline:none;border-color:var(--gh-link);box-shadow:0 0 0 3px rgba(9,105,218,.16);}
+  .gh-owner-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+  .gh-owner-row .gh-field{margin-bottom:0;}
+  .gh-slash{font-size:22px;color:var(--gh-muted);padding-bottom:4px;}
+  .gh-select{padding:8px 12px;border:1px solid var(--border);border-radius:6px;font:inherit;font-size:14.5px;background:#fff;}
+  .gh-check{font-size:13px;color:var(--gh-green-dark);font-weight:700;margin-top:6px;min-height:19px;}
+  .gh-check.bad{color:#9f1239;}
+  .gh-input.bad{border-color:#cf222e;box-shadow:0 0 0 3px rgba(207,34,46,.14);}
+  .gh-vis{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .gh-vis-opt{display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:#fff;}
+  .gh-vis-opt:hover{background:var(--surface);}
+  .gh-vis-opt input{margin-top:4px;accent-color:var(--gh-link);}
+  .gh-vis-opt.sel{border-color:var(--gh-link);background:#f0f7ff;}
+  .gh-vis-title{font-size:14.5px;font-weight:800;}
+  .gh-vis-desc{font-size:13px;color:var(--gh-muted);line-height:1.6;}
+  .gh-divider{height:1px;background:var(--border);margin:22px 0;}
+  .gh-btn{padding:9px 18px;border:none;border-radius:7px;background:var(--gh-green);color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;}
+  .gh-btn:hover:not(:disabled){background:var(--gh-green-dark);}
+  .gh-btn:disabled{background:#94d3a2;cursor:not-allowed;}
+  .gh-btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border);}
+  .gh-btn.ghost:hover{background:var(--surface);}
+  .gh-btn-row{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap;}
+  .gh-dropzone{border:1.5px dashed var(--border);border-radius:10px;padding:36px 20px;text-align:center;background:var(--surface);transition:all .15s;}
+  .gh-dropzone.drag{border-color:var(--gh-link);background:#f0f7ff;}
+  .gh-drop-icon{font-size:30px;color:var(--gh-muted);line-height:1;margin-bottom:10px;}
+  .gh-choose{border:none;background:none;color:var(--gh-link);font:inherit;font-weight:700;cursor:pointer;padding:0;text-decoration:underline;}
+  .gh-manual{margin-top:14px;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;}
+  .gh-manual-title{font-size:13px;font-weight:700;color:var(--gh-muted);margin-bottom:8px;}
+  .gh-filesize{font-size:12px;color:var(--gh-muted);white-space:nowrap;}
+  .gh-vis-warn{display:none;margin-top:10px;font-size:13px;font-weight:700;color:#9f1239;}
+  .gh-vis-warn.show{display:block;}
+  .gh-vis-opt.bad{border-color:#cf222e;background:#fff5f5;}
+  .gh-dropzone-text{font-size:15px;color:var(--gh-muted);margin-bottom:14px;}
+  .gh-file-row{display:flex;gap:9px;flex-wrap:wrap;}
+  .gh-file-row .gh-input{flex:1;min-width:180px;}
+  .gh-filelist{margin-top:16px;display:flex;flex-direction:column;gap:7px;}
+  .gh-fileitem{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:14px;}
+  .gh-fileicon{color:var(--gh-muted);}
+  .gh-filename{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;flex:1;word-break:break-all;}
+  .gh-filedel{border:none;background:none;color:var(--gh-muted);font-size:16px;cursor:pointer;padding:0 4px;}
+  .gh-commit-box{border:1px solid var(--border);border-radius:10px;padding:18px;background:var(--surface);}
+  .gh-commit-user{display:flex;gap:11px;align-items:flex-start;}
+  .gh-commit-avatar{width:36px;height:36px;border-radius:50%;background:#57606a;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .gh-commit-fields{flex:1;display:flex;flex-direction:column;gap:9px;}
+  .gh-textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font:inherit;font-size:14px;min-height:78px;resize:vertical;background:#fff;}
+  .gh-textarea:focus{outline:none;border-color:var(--gh-link);box-shadow:0 0 0 3px rgba(9,105,218,.16);}
+
+  .gh-repo-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:14px;}
+  .gh-repo-name{font-size:20px;font-weight:600;color:var(--gh-link);word-break:break-all;}
+  .gh-repo-owner{font-size:20px;color:var(--gh-link);}
+  .gh-pill{font-size:11.5px;font-weight:700;color:var(--gh-muted);border:1px solid var(--border);border-radius:999px;padding:2px 9px;}
+  .gh-tabs{display:flex;gap:20px;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;}
+  .gh-tab{padding:9px 2px;font-size:14px;color:var(--text-mid);white-space:nowrap;}
+  .gh-tab.active{font-weight:800;color:var(--text);border-bottom:2px solid var(--orange);}
+  .gh-filebar{display:flex;align-items:center;gap:10px;padding:11px 15px;background:var(--surface);border:1px solid var(--border);border-radius:8px 8px 0 0;font-size:13px;color:var(--gh-muted);}
+  .gh-filebar b{color:var(--text);font-weight:700;}
+  .gh-filebar .gh-commitmsg{flex:1;color:var(--text-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .gh-filetable{border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;}
+  .gh-filetable-row{display:flex;align-items:center;gap:10px;padding:11px 15px;border-top:1px solid var(--border);font-size:14px;}
+  .gh-filetable-row:first-child{border-top:none;}
+  .gh-filetable-name{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13.5px;color:var(--gh-link);flex:1;word-break:break-all;}
+  .gh-filetable-msg{font-size:13px;color:var(--gh-muted);max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .gh-filetable-time{font-size:12.5px;color:var(--gh-muted);white-space:nowrap;}
+  .sim-done-banner{margin-top:22px;padding:18px 20px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:15px;line-height:1.85;font-weight:600;}
+
+  /* ===== 실습 기록 ===== */
+  .log-block{border:1px solid var(--border);border-radius:12px;padding:24px;background:#fff;margin:20px 0;}
+  .log-q{font-size:16px;font-weight:900;line-height:1.55;margin-bottom:6px;}
+  .log-q-desc{font-size:13.5px;color:var(--text-mid);line-height:1.7;margin-bottom:16px;}
+  .log-field{margin-bottom:15px;}
+  .log-label{display:block;font-size:13px;font-weight:800;margin-bottom:6px;}
+  .log-input,.log-select,.log-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font:inherit;font-size:14.5px;background:#fff;color:var(--text);}
+  .log-textarea{min-height:78px;resize:vertical;}
+  .log-input:focus,.log-select:focus,.log-textarea:focus{outline:none;border-color:var(--blue-sky);box-shadow:0 0 0 3px rgba(14,165,233,.14);}
+  .log-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .log-sample{display:none;margin-top:18px;padding:18px 20px;border-radius:10px;background:var(--blue-lighter);border:1px solid var(--blue-line);}
+  .log-sample.show{display:block;}
+  .log-sample-title{font-size:13.5px;font-weight:900;color:var(--blue-mid);margin-bottom:10px;}
+  .log-sample p{font-size:14px;color:var(--blue-mid);line-height:1.85;margin-bottom:8px;}
+  .log-sample p:last-child{margin-bottom:0;}
+
+  .article-nav{display:flex;justify-content:space-between;gap:10px;margin-top:26px;padding-top:18px;border-top:1px solid var(--border);flex-wrap:wrap;}
+  .nav-btn{padding:10px 22px;font-size:13px;font-weight:700;font-family:inherit;border-radius:6px;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--bg);color:var(--text-mid);}
+  .nav-btn:hover:not(:disabled){border-color:#94a3b8;color:var(--text);}
+  .nav-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .nav-btn.primary:hover:not(:disabled){background:var(--blue-mid);}
+  .nav-btn:disabled{opacity:.38;cursor:not-allowed;background:#94a3b8;border-color:#94a3b8;color:#fff;}
+  .gate-msg{font-size:13.5px;font-weight:800;color:var(--text-sub);margin-top:12px;}
+  .gate-msg.ready{color:#166534;}
+
+  .completion-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.56);}
+  .completion-modal.open{display:flex;}
+  .completion-dialog{width:min(520px,100%);max-height:calc(100vh - 48px);overflow-y:auto;padding:28px;border-radius:14px;background:#fff;box-shadow:0 20px 50px rgba(15,23,42,.24);}
+  .completion-kicker{font-size:11px;font-weight:900;letter-spacing:.14em;color:var(--blue-sky);margin-bottom:8px;}
+  .completion-title{font-size:24px;font-weight:900;margin-bottom:8px;}
+  .completion-desc{font-size:14px;line-height:1.75;color:var(--text-mid);margin-bottom:20px;}
+  .completion-field{margin-bottom:14px;}
+  .completion-label{display:block;font-size:13px;font-weight:800;margin-bottom:6px;}
+  .completion-input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font:inherit;background:#fff;}
+  .completion-input:focus{outline:none;border-color:var(--blue-sky);box-shadow:0 0 0 3px rgba(14,165,233,.12);}
+  .completion-result{display:none;margin-top:12px;padding:11px 13px;border-radius:8px;font-size:13.5px;font-weight:700;line-height:1.6;}
+  .completion-result.show{display:block;}
+  .completion-result.success{color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;}
+  .completion-result.error{color:#9f1239;background:#fff1f2;border:1px solid #fecdd3;}
+  .completion-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .modal-btn{padding:10px 18px;font-size:13px;font-weight:800;font-family:inherit;border-radius:7px;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text-mid);}
+  .modal-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .modal-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .footer{margin-left:var(--sidebar-w);padding:24px 40px 36px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-sub);text-align:center;}
+
+  .page{display:none;}
+  .page.active{display:block;}
+  @media(max-width:980px){.footer{margin-left:0;}}
+  @media(max-width:760px){.intro-stage-list{grid-template-columns:1fr;}.intro-stage-arrow{transform:rotate(90deg);min-height:20px;}.log-two{grid-template-columns:1fr;}}
+  @media(max-width:640px){.sidebar{display:none;}.article{padding:28px 18px 60px;}.progress-header{padding:12px 18px 14px;}.gh-screen{padding:20px 16px 24px;}.judge-body{padding:16px;}}
+  /* ===== GitHub 시뮬레이터 v2 ===== */
+  .coach{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;margin-bottom:12px;border-radius:10px;background:#fff8e6;border:1px solid #f5d88a;}
+  .coach-num{width:26px;height:26px;border-radius:50%;background:var(--orange);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .coach-text{font-size:15px;font-weight:700;line-height:1.7;color:#7a4b00;}
+  .coach-text b{color:#5c3700;font-weight:900;}
+  .g-wrap{position:relative;}
+  .g-page{display:none;background:#fff;}
+  .g-page.on{display:block;}
+  .g-appheader{display:flex;align-items:center;gap:12px;padding:12px 18px;background:#f6f8fa;border-bottom:1px solid #d1d9e0;}
+  .g-ham{width:32px;height:32px;border:1px solid #d1d9e0;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#59636e;font-size:14px;background:#fff;cursor:pointer;}
+  .g-mark{width:30px;height:30px;border-radius:50%;background:#1f2328;flex-shrink:0;}
+  .g-crumb{font-size:14px;color:#1f2328;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .g-crumb b{font-weight:600;}
+  .g-search{margin-left:auto;display:flex;align-items:center;gap:8px;min-width:0;}
+  .g-searchbox{width:220px;max-width:30vw;padding:5px 10px;border:1px solid #d1d9e0;border-radius:6px;background:#fff;font-size:12.5px;color:#818b98;cursor:pointer;white-space:nowrap;overflow:hidden;}
+  .g-hbtn{width:32px;height:32px;border:1px solid #d1d9e0;border-radius:6px;background:#fff;color:#59636e;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;flex-shrink:0;}
+  .g-av{width:30px;height:30px;border-radius:50%;background:#8c959f;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .g-reponav{display:flex;gap:2px;padding:0 14px;background:#f6f8fa;border-bottom:1px solid #d1d9e0;overflow-x:auto;}
+  .g-rtab{display:flex;align-items:center;gap:6px;padding:9px 10px;font-size:14px;color:#1f2328;white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;}
+  .g-rtab:hover{background:#eaeef2;border-radius:6px 6px 0 0;}
+  .g-rtab.on{font-weight:600;border-bottom-color:#fd8c73;}
+  .g-rtab svg{fill:#59636e;}
+  .g-body{padding:20px 22px 26px;}
+  .g-titlerow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px;}
+  .g-title{font-size:20px;font-weight:600;color:#1f2328;word-break:break-all;}
+  .g-label{font-size:12px;font-weight:500;color:#59636e;border:1px solid #d1d9e0;border-radius:999px;padding:0 8px;line-height:20px;}
+  .g-actions{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;}
+  .g-btn{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;height:30px;border:1px solid #d1d9e0;border-radius:6px;background:#f6f8fa;color:#25292e;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;}
+  .g-btn:hover{background:#eff2f5;}
+  .g-btn .cnt{background:#e6eaef;border-radius:999px;padding:0 6px;font-size:11.5px;font-weight:600;}
+  .g-btn.green{background:#1f883d;color:#fff;border-color:rgba(31,35,40,.15);font-weight:600;}
+  .g-btn.green:hover{background:#1c8139;}
+  .g-btn.green:disabled{background:#94d3a2;cursor:not-allowed;}
+  .g-btn.big{height:34px;padding:5px 16px;font-size:14px;}
+  .g-gen{font-size:12.5px;color:#59636e;margin-bottom:16px;}
+  .g-gen a{color:#0969da;}
+  .g-cols{display:flex;gap:24px;align-items:flex-start;}
+  .g-main{flex:1;min-width:0;}
+  .g-side{width:230px;flex-shrink:0;}
+  .g-side h3{font-size:15px;font-weight:600;margin-bottom:10px;}
+  .g-side p{font-size:13.5px;color:#59636e;line-height:1.6;}
+  .g-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .g-meta{font-size:13px;color:#59636e;display:inline-flex;align-items:center;gap:4px;cursor:pointer;}
+  .g-meta b{color:#1f2328;font-weight:600;}
+  .g-gotofile{margin-left:auto;width:170px;max-width:100%;padding:4px 10px;height:30px;border:1px solid #d1d9e0;border-radius:6px;font-size:13px;color:#818b98;display:flex;align-items:center;cursor:pointer;background:#fff;}
+  .g-dd{position:relative;display:inline-block;}
+  .g-menu{display:none;position:absolute;right:0;top:36px;z-index:30;min-width:230px;background:#fff;border:1px solid #d1d9e0;border-radius:12px;box-shadow:0 8px 24px rgba(66,74,83,.18);padding:6px;}
+  .g-menu.open{display:block;}
+  .g-mi{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:6px;font-size:14px;color:#1f2328;cursor:pointer;white-space:nowrap;}
+  .g-mi:hover{background:#eff2f5;}
+  .g-mi svg{fill:#59636e;}
+  .g-files{border:1px solid #d1d9e0;border-radius:6px;overflow:hidden;}
+  .g-lastc{display:flex;align-items:center;gap:9px;padding:11px 14px;background:#f6f8fa;border-bottom:1px solid #d1d9e0;font-size:13px;}
+  .g-lastc .av{width:22px;height:22px;border-radius:50%;background:#8c959f;color:#fff;font-size:8.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .g-lastc .who{font-weight:600;color:#1f2328;}
+  .g-lastc .msg{color:#59636e;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .g-lastc .sha{color:#59636e;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;}
+  .g-lastc .commits{color:#1f2328;font-weight:600;white-space:nowrap;}
+  .g-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid #d1d9e0;font-size:14px;}
+  .g-row:first-of-type{border-top:none;}
+  .g-row:hover{background:#f6f8fa;}
+  .g-row .nm{flex:0 0 34%;min-width:0;color:#1f2328;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .g-row .nm:hover{color:#0969da;text-decoration:underline;cursor:pointer;}
+  .g-row .cm{flex:1;min-width:0;color:#59636e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;}
+  .g-row .tm{color:#59636e;font-size:13px;white-space:nowrap;}
+  .g-row.new{background:#dafbe1;}
+  .g-readme{margin-top:18px;border:1px solid #d1d9e0;border-radius:6px;overflow:hidden;}
+  .g-readme-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #d1d9e0;font-size:14px;font-weight:600;}
+  .g-readme-b{padding:22px 26px;}
+  .g-readme-b h1{font-size:24px;font-weight:600;padding-bottom:8px;border-bottom:1px solid #d1d9e0;margin-bottom:14px;line-height:1.35;}
+  .g-readme-b h2{font-size:19px;font-weight:600;padding-bottom:6px;border-bottom:1px solid #d1d9e0;margin:18px 0 10px;}
+  .g-readme-b blockquote{border-left:4px solid #d1d9e0;padding:0 14px;color:#59636e;font-size:14.5px;}
+  .g-readme-b p{font-size:14.5px;line-height:1.7;}
+  .g-form{max-width:680px;margin:0 auto;}
+  .g-form h2{font-size:24px;font-weight:400;margin-bottom:4px;}
+  .g-form .sub{font-size:14px;color:#59636e;padding-bottom:16px;border-bottom:1px solid #d1d9e0;margin-bottom:18px;line-height:1.6;}
+  .g-fl{display:block;font-size:14px;font-weight:600;margin-bottom:6px;color:#1f2328;}
+  .g-fl .req{color:#d1242f;}
+  .g-fl .opt{font-weight:400;color:#59636e;}
+  .g-in{width:100%;height:34px;padding:5px 12px;border:1px solid #d1d9e0;border-radius:6px;font:inherit;font-size:14px;background:#fff;color:#1f2328;}
+  .g-in:focus,.g-ta:focus{outline:2px solid #0969da;outline-offset:-1px;border-color:#0969da;}
+  .g-in.bad{border-color:#d1242f;outline-color:#d1242f;}
+  .g-sel{height:34px;padding:0 30px 0 12px;border:1px solid #d1d9e0;border-radius:6px;font:inherit;font-size:14px;background:#f6f8fa;color:#1f2328;cursor:pointer;}
+  .g-sel.bad{border-color:#d1242f;}
+  .g-fg{margin-bottom:18px;}
+  .g-ownerrow{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;}
+  .g-slash{font-size:22px;color:#59636e;padding-top:26px;}
+  .g-note{font-size:12.5px;color:#59636e;margin-top:6px;line-height:1.6;}
+  .g-ok{font-size:12.5px;font-weight:600;color:#1a7f37;margin-top:6px;}
+  .g-err{font-size:12.5px;font-weight:600;color:#d1242f;margin-top:6px;}
+  .g-tplbox{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #d1d9e0;border-radius:6px;background:#f6f8fa;font-size:14px;width:fit-content;max-width:100%;}
+  .g-check{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin-top:10px;color:#1f2328;}
+  .g-check small{display:block;color:#59636e;font-size:12.5px;}
+  .g-hr{height:1px;background:#d1d9e0;margin:20px 0;}
+  .g-radio{display:flex;gap:10px;align-items:flex-start;padding:10px 0;cursor:pointer;}
+  .g-radio input{margin-top:5px;accent-color:#0969da;}
+  .g-radio .ic{width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#59636e;flex-shrink:0;}
+  .g-radio .t{font-size:14px;font-weight:600;color:#1f2328;}
+  .g-radio .d{font-size:12.5px;color:#59636e;}
+  .g-radio.bad .t{color:#d1242f;}
+  .g-right{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .g-generating{padding:80px 20px;text-align:center;}
+  .g-spin{width:38px;height:38px;border:4px solid #d1d9e0;border-top-color:#0969da;border-radius:50%;margin:0 auto 18px;animation:gspin .8s linear infinite;}
+  @keyframes gspin{to{transform:rotate(360deg)}}
+  .g-generating h3{font-size:20px;font-weight:400;margin-bottom:6px;}
+  .g-generating p{font-size:14px;color:#59636e;}
+  .g-upcrumb{font-size:20px;margin-bottom:16px;}
+  .g-upcrumb a{color:#0969da;font-weight:600;}
+  .g-drop{border:1px dashed #d1d9e0;border-radius:6px;padding:46px 20px;text-align:center;background:#fff;transition:all .15s;}
+  .g-drop.drag{border-color:#0969da;background:#ddf4ff;}
+  .g-drop .big{font-size:20px;color:#1f2328;margin-bottom:4px;}
+  .g-drop .small{font-size:14px;color:#59636e;}
+  .g-drop .small a{color:#0969da;cursor:pointer;text-decoration:underline;}
+  .g-drop-ic{margin:0 auto 12px;width:50px;height:50px;opacity:.55;}
+  .g-uplist{border:1px solid #d1d9e0;border-top:none;border-radius:0 0 6px 6px;}
+  .g-uplist:empty{display:none;}
+  .g-upitem{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid #d1d9e0;font-size:13.5px;}
+  .g-upitem:first-child{border-top:none;}
+  .g-upitem .n{flex:1;min-width:0;word-break:break-all;}
+  .g-upitem .s{color:#59636e;font-size:12.5px;white-space:nowrap;}
+  .g-upitem button{border:none;background:none;color:#59636e;font-size:17px;cursor:pointer;padding:0 4px;}
+  .g-manual{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:#59636e;}
+  .g-manual .g-in{width:220px;height:30px;font-size:13px;}
+  .g-commit{display:flex;gap:14px;margin-top:22px;}
+  .g-commit .bigav{width:40px;height:40px;border-radius:50%;background:#8c959f;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .g-commitbox{flex:1;min-width:0;border:1px solid #d1d9e0;border-radius:6px;padding:16px;position:relative;}
+  .g-commitbox h3{font-size:16px;font-weight:600;margin-bottom:8px;}
+  .g-commit-help{font-size:13px;color:#59636e;line-height:1.7;margin-bottom:10px;padding:10px 12px;border-radius:7px;background:#f6f8fa;border:1px solid #d1d9e0;}
+  .g-commit-help b{color:#1f2328;font-weight:700;}
+  .g-ta{width:100%;min-height:90px;padding:8px 12px;border:1px solid #d1d9e0;border-radius:6px;font:inherit;font-size:14px;resize:vertical;margin-top:8px;}
+  .g-toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) translateY(10px);z-index:50;max-width:88%;padding:11px 16px;border-radius:8px;background:#1f2328;color:#fff;font-size:13.5px;font-weight:600;line-height:1.55;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:all .2s;text-align:center;}
+  .g-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .coach-target{position:relative;z-index:5;outline:3px solid #e8611a !important;outline-offset:3px;animation:gpulse 1.3s ease-out infinite;}
+  @keyframes gpulse{0%{box-shadow:0 0 0 0 rgba(232,97,26,.75);}70%{box-shadow:0 0 0 16px rgba(232,97,26,0);}100%{box-shadow:0 0 0 0 rgba(232,97,26,0);}}
+  .g-callout{position:absolute;z-index:60;display:none;pointer-events:none;}
+  .g-callout.show{display:block;}
+  .g-callout-in{position:relative;padding:9px 16px;border-radius:999px;background:#e8611a;color:#fff;font-size:14px;font-weight:800;white-space:nowrap;box-shadow:0 6px 18px rgba(232,97,26,.45);animation:gbob 1s ease-in-out infinite;}
+  .g-callout-in::before{content:'';position:absolute;border:8px solid transparent;}
+  .g-callout.below{transform:translateX(-50%);}
+  .g-callout.below .g-callout-in::before{left:50%;top:-15px;margin-left:-8px;border-bottom-color:#e8611a;}
+  .g-callout.above{transform:translate(-50%,-100%);}
+  .g-callout.above .g-callout-in::before{left:50%;bottom:-15px;margin-left:-8px;border-top-color:#e8611a;}
+  .g-callout.left{transform:translate(-100%,-50%);}
+  .g-callout.left .g-callout-in::before{right:-15px;top:50%;margin-top:-8px;border-left-color:#e8611a;}
+  @keyframes gbob{0%,100%{translate:0 0;}50%{translate:0 -4px;}}
+  .g-callout.left .g-callout-in{animation-name:gbobx;}
+  @keyframes gbobx{0%,100%{translate:0 0;}50%{translate:-5px 0;}}
+  .nav-btn.coach-target{outline-offset:4px;}
+  #simBlock{scroll-margin-top:124px;}
+  .g-success{display:none;gap:14px;align-items:flex-start;padding:18px 20px;margin-bottom:18px;border-radius:10px;background:#dafbe1;border:1.5px solid #4ac26b;}
+  .g-success.show{display:flex;}
+  .g-success-ic{width:34px;height:34px;border-radius:50%;background:#1f883d;color:#fff;font-size:19px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .g-success-body{flex:1;min-width:0;}
+  .g-success-title{font-size:17px;font-weight:900;color:#116329;margin-bottom:4px;}
+  .g-success-desc{font-size:14px;color:#1a4d2e;line-height:1.75;}
+  .g-success-btn{margin-top:12px;padding:9px 18px;border:none;border-radius:7px;background:#003087;color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;}
+  .g-success-btn:hover{background:#1a4fa0;}
+  .g-success-btn.todo{background:#9f1239;}
+  .g-callout.inright{transform:translate(-100%,-50%);}
+  .sidebar-link.coach-target{outline-offset:-3px;}
+  .gate-link{border:none;background:none;padding:0 2px;font:inherit;font-weight:900;color:#9f1239;text-decoration:underline;cursor:pointer;}
+  .gate-msg.todo{color:#9f1239;}
+  .g-finish{margin-top:18px;padding:16px 18px;border-radius:10px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:14.5px;line-height:1.8;font-weight:600;}
+  @media(max-width:900px){.g-side{display:none;}}
+  @media(max-width:640px){.g-searchbox{display:none;}.g-body{padding:16px 14px 20px;}.g-row .cm{display:none;}.g-row .nm{flex:1;}.g-actions{margin-left:0;}.g-gotofile{display:none;}}
+
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-brand">DSR AI 기초교육<span>3단계 실습</span></div></div>
+<div class="progress-header">
+<div class="progress-info"><span id="progress-label">시작하기 전 · 1 / 4</span><span id="progress-percent">0%</span></div>
+<div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+</div>
+
+<div class="layout">
+<nav class="sidebar">
+<div class="sidebar-group">3단계 실습</div>
+<button class="sidebar-link active" id="nav-intro" onclick="goPage('intro')">시작하기 전에</button>
+<div class="sidebar-group">Chapter 01</div>
+<button class="sidebar-link" id="nav-start" onclick="goPage('start')">프로젝트 시작하기<span class="sidebar-state" id="state-start"></span></button>
+<div class="sidebar-group">Chapter 02</div>
+<button class="sidebar-link" id="nav-judge" onclick="goPage('judge')">승인 요청 판단하기<span class="sidebar-state" id="state-judge"></span></button>
+<div class="sidebar-group">Chapter 03</div>
+<button class="sidebar-link" id="nav-upload" onclick="goPage('upload')">결과물 올리기<span class="sidebar-state" id="state-upload"></span></button>
+</nav>
+
+<div class="main">
+
+<!-- ============ INTRO ============ -->
+<div class="page active" id="page-intro">
+<article class="article">
+<div class="intro-panel">
+<h1 class="intro-title">시작하기 전</h1>
+<div class="intro-lede">
+<p>3단계 실습 교육은 전산팀에서 제작한 교육 영상을 통해 진행됩니다.<br/>본 페이지는 <b>개발 과정을 처음부터 끝까지 따라가 보는 실습형 퀴즈</b>입니다.<br/>저장소 생성부터 결과물 업로드까지, 실제와 동일하게 구성된 연습 화면에서 순서대로 진행합니다.</p>
+<p><span class="required-notice">세 가지 과정을 모두 완료한 뒤 교육 완료 버튼을 눌러야 3단계 교육 이수가 인정됩니다.</span></p>
+</div>
+<div class="intro-stage-list">
+<div class="intro-stage-item"><div class="intro-stage-num">1</div><div class="intro-stage-text">1단계 AI 리터러시 기초</div></div>
+<div class="intro-stage-arrow">→</div>
+<div class="intro-stage-item"><div class="intro-stage-num">2</div><div class="intro-stage-text">2단계 개발 기초 개념</div></div>
+<div class="intro-stage-arrow">→</div>
+<div class="intro-stage-item current"><div class="intro-stage-num">3</div><div class="intro-stage-text">3단계 실습</div></div>
+</div>
+<div class="flow-list">
+<div class="flow-item"><div class="flow-num">1</div><div class="flow-text"><b>프로젝트 시작하기</b> · 사내 템플릿으로 프로젝트 저장소를 생성합니다.</div></div>
+<div class="flow-item"><div class="flow-num">2</div><div class="flow-text"><b>승인 요청 판단하기</b> · 개발 중 표시되는 승인 요청의 허용 여부를 판단합니다. (3문항)</div></div>
+<div class="flow-item"><div class="flow-num">3</div><div class="flow-text"><b>결과물 올리기</b> · 1번에서 생성한 저장소에 파일을 업로드하고 커밋합니다.</div></div>
+</div>
+<div class="article-nav"><span></span><button class="nav-btn primary" onclick="goPage('start')">Chapter 01 시작</button></div>
+</div>
+</article>
+</div>
+
+<!-- ============ START (GitHub 1부) ============ -->
+<div class="page" id="page-start">
+<article class="article" style="max-width:1080px">
+<div class="breadcrumb">DSR AI 기초교육 <span>/</span> 3단계 <span>/</span> Chapter 01</div>
+<h1 class="article-title">프로젝트 시작하기</h1>
+<p class="article-lead">AI를 활용한 프로그램 개발은 GitHub에 Repository(프로젝트 저장소)를 만드는 것에서 시작합니다. 안내를 따라, 사내 템플릿으로 저장소를 만들어 주시기 바랍니다.</p>
+<div id="slot-start">
+<div id="simBlock">
+<div class="sim-steps" id="simSteps"></div>
+<div class="coach"><div class="coach-num" id="coachNum">1</div><div class="coach-text" id="coachText"></div></div>
+<div class="browser">
+<div class="browser-chrome">
+<div class="browser-dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+<div class="browser-url" id="urlbar">github.com/DSR-family/dsr-template</div>
+</div>
+<div class="g-wrap" id="gwrap">
+
+<!-- P1 : 템플릿 저장소 -->
+<div class="g-page on" id="gp-tpl">
+<div class="g-appheader"><div class="g-ham" data-inert="">≡</div><div class="g-mark"></div><div class="g-crumb">DSR-family / <b>dsr-template</b></div><div class="g-search"><div class="g-searchbox" data-inert="">Type / to search</div><div class="g-hbtn" data-inert="">+</div><div class="g-av">ME</div></div></div>
+<div class="g-reponav" data-tabs=""></div>
+<div class="g-body">
+<div class="g-titlerow"><span data-ic="repo"></span><span class="g-title">dsr-template</span><span class="g-label">Private template</span>
+<div class="g-actions"><button class="g-btn" data-inert="Watch는 저장소의 변경 알림을 받을 때 사용하는 기능입니다. Use this template 버튼을 선택하시기 바랍니다.">Watch <span class="cnt">4</span></button><button class="g-btn" data-inert="Fork는 다른 사용자의 저장소를 복제할 때 사용하는 기능입니다. 사내 프로젝트는 템플릿으로 시작하므로 Use this template 버튼을 선택하시기 바랍니다.">Fork <span class="cnt">0</span></button><button class="g-btn" data-inert="Star는 저장소를 즐겨찾기에 추가하는 기능입니다. Use this template 버튼을 선택하시기 바랍니다.">Star <span class="cnt">2</span></button></div></div>
+<div class="g-cols" style="margin-top:14px">
+<div class="g-main">
+<div class="g-toolbar">
+<button class="g-btn" data-inert="">main ▾</button><span class="g-meta" data-inert=""><b>1</b> Branch</span><span class="g-meta" data-inert=""><b>0</b> Tags</span>
+<div class="g-gotofile" data-inert="">Go to file</div>
+<div class="g-dd"><button class="g-btn green coach-target" id="tplBtn" onclick="toggleMenu('tplMenu',event)">Use this template ▾</button>
+<div class="g-menu" id="tplMenu"><div class="g-mi coach-target" id="tplCreate" onclick="goGh('new')">＋ Create a new repository</div><div class="g-mi" data-inert="Codespace는 본 실습에서 사용하지 않습니다. Create a new repository를 선택하시기 바랍니다.">Open in a codespace</div></div></div>
+<button class="g-btn" data-inert="Code 버튼은 저장소를 내 컴퓨터로 복사(Clone)할 때 사용합니다. Use this template 버튼을 선택하시기 바랍니다.">&lt;&gt; Code ▾</button>
+</div>
+<div class="g-files" id="tplFiles"></div>
+<div class="g-readme"><div class="g-readme-h">README</div><div class="g-readme-b" data-readme=""></div></div>
+</div>
+<div class="g-side"><h3>About</h3><p>DSR 사내 프로젝트 템플릿입니다. 개발 규칙 파일과 보안 hook이 포함되어 있습니다.</p></div>
+</div>
+</div>
+</div>
+
+<!-- P2 : 템플릿으로 새 저장소 만들기 -->
+<div class="g-page" id="gp-new">
+<div class="g-appheader"><div class="g-ham" data-inert="">≡</div><div class="g-mark"></div><div class="g-crumb"><b>New repository</b></div><div class="g-search"><div class="g-searchbox" data-inert="">Type / to search</div><div class="g-av">ME</div></div></div>
+<div class="g-body"><div class="g-form">
+<h2>Create a new repository</h2>
+<div class="sub">A repository contains all project files, including the revision history.</div>
+<div class="g-fg"><span class="g-fl">Repository template</span>
+<div class="g-tplbox"><span data-ic="repo"></span>DSR-family/dsr-template</div>
+<label class="g-check"><input disabled type="checkbox"/><span>Include all branches<small>Copy all branches from DSR-family/dsr-template and not just the default branch.</small></span></label>
+</div>
+<div class="g-ownerrow">
+<div class="g-fg"><label class="g-fl" for="gOwner">Owner <span class="req">*</span></label>
+<select class="g-sel" id="gOwner" onchange="validateNew()"><option value="my-account">my-account</option><option value="DSR-family">DSR-family</option></select></div>
+<div class="g-slash">/</div>
+<div class="g-fg" style="flex:1;min-width:230px"><label class="g-fl" for="gName">Repository name <span class="req">*</span></label>
+<input autocomplete="off" class="g-in" id="gName" maxlength="100" oninput="validateNew()" type="text"/>
+<div id="gNameMsg"></div></div>
+</div>
+<div class="g-err" id="gOwnerMsg" style="margin-top:-8px;margin-bottom:12px"></div>
+<div class="g-note" style="margin-bottom:18px">Great repository names are short and memorable. Need inspiration? How about <b>sales-report</b>?</div>
+<div class="g-fg"><label class="g-fl" for="gDesc">Description <span class="opt">(optional)</span></label><input class="g-in" id="gDesc" type="text"/></div>
+<div class="g-hr"></div>
+<label class="g-radio" id="gVisPub"><input checked name="gvis" onchange="validateNew()" type="radio" value="public"/><span class="ic" data-ic="book"></span><span><span class="t">Public</span><br/><span class="d">Anyone on the internet can see this repository. You choose who can commit.</span></span></label>
+<label class="g-radio" id="gVisPri"><input name="gvis" onchange="validateNew()" type="radio" value="private"/><span class="ic" data-ic="lock"></span><span><span class="t">Private</span><br/><span class="d">You choose who can see and commit to this repository.</span></span></label>
+<div class="g-err" id="gVisMsg"></div>
+<div class="g-hr"></div>
+<div class="g-right"><button class="g-btn green big" disabled id="gCreate" onclick="createRepo()">Create repository</button></div>
+</div></div>
+</div>
+
+<!-- P3 : 생성 중 -->
+<div class="g-page" id="gp-gen">
+<div class="g-appheader"><div class="g-ham">≡</div><div class="g-mark"></div><div class="g-crumb"><b>New repository</b></div><div class="g-search"><div class="g-av">ME</div></div></div>
+<div class="g-generating"><div class="g-spin"></div><h3>Generating your repository...</h3><p id="genText"></p></div>
+</div>
+
+<!-- P4 : 새 저장소 -->
+<div class="g-page" id="gp-repo">
+<div class="g-appheader"><div class="g-ham" data-inert="">≡</div><div class="g-mark"></div><div class="g-crumb" id="repoCrumb"></div><div class="g-search"><div class="g-searchbox" data-inert="">Type / to search</div><div class="g-hbtn" data-inert="">+</div><div class="g-av">ME</div></div></div>
+<div class="g-reponav" data-tabs=""></div>
+<div class="g-body">
+<div class="g-success" id="gSuccess"></div>
+<div class="g-titlerow"><span data-ic="lock"></span><span class="g-title" id="repoTitle"></span><span class="g-label">Private</span>
+<div class="g-actions"><button class="g-btn" data-inert="">Watch <span class="cnt">1</span></button><button class="g-btn" data-inert="">Fork <span class="cnt">0</span></button><button class="g-btn" data-inert="">Star <span class="cnt">0</span></button></div></div>
+<div class="g-gen">generated from <a>DSR-family/dsr-template</a></div>
+<div class="g-cols">
+<div class="g-main">
+<div class="g-toolbar">
+<button class="g-btn" data-inert="">main ▾</button><span class="g-meta" data-inert=""><b>1</b> Branch</span><span class="g-meta" data-inert=""><b>0</b> Tags</span>
+<div class="g-gotofile" data-inert="">Go to file</div>
+<div class="g-dd"><button class="g-btn" id="addBtn" onclick="toggleMenu('addMenu',event)">Add file ▾</button>
+<div class="g-menu" id="addMenu"><div class="g-mi" data-inert="Create new file은 화면에서 새 파일을 직접 작성할 때 사용합니다. Upload files를 선택하시기 바랍니다.">＋ Create new file</div><div class="g-mi" id="addUpload" onclick="goGh('up')">⇪ Upload files</div></div></div>
+<button class="g-btn green" data-inert="Code 버튼은 저장소를 내 컴퓨터로 복사(Clone)할 때 사용합니다. Add file 버튼을 선택하시기 바랍니다.">&lt;&gt; Code ▾</button>
+</div>
+<div class="g-files" id="repoFiles"></div>
+<div class="g-readme"><div class="g-readme-h">README</div><div class="g-readme-b" data-readme=""></div></div>
+<div class="g-finish" id="gFinish" style="display:none"></div>
+</div>
+<div class="g-side"><h3>About</h3><p id="repoAbout">No description, website, or topics provided.</p></div>
+</div>
+</div>
+</div>
+
+<!-- P5 : 파일 업로드 + 커밋 -->
+<div class="g-page" id="gp-up">
+<div class="g-appheader"><div class="g-ham" data-inert="">≡</div><div class="g-mark"></div><div class="g-crumb" id="upCrumb"></div><div class="g-search"><div class="g-searchbox" data-inert="">Type / to search</div><div class="g-av">ME</div></div></div>
+<div class="g-reponav" data-tabs=""></div>
+<div class="g-body">
+<div class="g-upcrumb"><a id="upRepoLink" onclick="goGh('repo')"></a> /</div>
+<div class="g-drop coach-target" id="gDrop">
+<svg class="g-drop-ic" viewBox="0 0 48 48"><path d="M10 6h20l8 8v28H10z" fill="none" stroke="#59636e" stroke-width="2"/><path d="M30 6v8h8" fill="none" stroke="#59636e" stroke-width="2"/><path d="M24 36V20m-6 6 6-6 6 6" fill="none" stroke="#59636e" stroke-width="2"/></svg>
+<div class="big">Drag files here to add them to your repository</div>
+<div class="small">Or <a onclick="document.getElementById('gFile').click()">choose your files</a></div>
+<input id="gFile" multiple onchange="addRealFiles(this.files);this.value='';" style="display:none" type="file"/>
+</div>
+<div class="g-uplist" id="gUpList"></div>
+<div class="g-manual">업로드할 파일이 없는 경우 파일 이름만 입력할 수 있습니다 <input class="g-in" id="gManual" onkeydown="if(event.key==='Enter'){event.preventDefault();addManual();}" placeholder="sales_report.py" type="text"/><button class="g-btn" onclick="addManual()">추가</button></div>
+<div class="g-commit">
+<div class="bigav">ME</div>
+<div class="g-commitbox">
+<h3>Commit changes</h3>
+<div class="g-commit-help">커밋 메시지는 이번에 <b>무엇을 추가하거나 변경했는지</b> 남기는 한 줄 기록입니다. 저장소에 이력으로 남아 나중에 작업 내용을 확인하는 데 사용됩니다.<br/>예) 매출 집계 프로그램 추가 · 날짜 필터 오류 수정 · README 사용 방법 보완</div>
+<input class="g-in" id="gMsg" maxlength="72" oninput="validateCommit()" placeholder="Add files via upload" type="text"/>
+<div class="g-err" id="gMsgErr"></div>
+<textarea class="g-ta" id="gMsgDesc" placeholder="Add an optional extended description..."></textarea>
+<label class="g-radio"><input checked name="gbr" type="radio" value="main"/><span><span class="t" style="font-weight:400">Commit directly to the <b style="font-family:ui-monospace,Menlo,monospace;background:#ddf4ff;color:#0969da;padding:1px 6px;border-radius:6px;font-weight:500">main</b> branch.</span></span></label>
+<label class="g-radio" style="padding-top:0"><input name="gbr" type="radio" value="branch"/><span><span class="t" style="font-weight:400">Create a <b>new branch</b> for this commit and start a pull request.</span></span></label>
+<div class="g-right" style="justify-content:flex-start"><button class="g-btn green" disabled id="gCommit" onclick="doCommit()">Commit changes</button><button class="g-btn" onclick="goGh('repo')">Cancel</button></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="g-callout" id="gCallout"><div class="g-callout-in" id="gCalloutText"></div></div>
+<div class="g-toast" id="gToast"></div>
+</div>
+</div>
+
+</div>
+</div>
+<div class="article-nav">
+<button class="nav-btn" onclick="goPage('intro')">이전</button>
+<button class="nav-btn primary" disabled id="start-next" onclick="goPage('judge')">Chapter 02로</button>
+</div>
+<div class="gate-msg" id="start-gate">저장소를 생성하면 다음 단계로 진행할 수 있습니다.</div>
+</article>
+</div>
+
+<!-- ============ JUDGE ============ -->
+<div class="page" id="page-judge">
+<article class="article">
+<div class="breadcrumb">DSR AI 기초교육 <span>/</span> 3단계 <span>/</span> Chapter 02</div>
+<h1 class="article-title">승인 요청 판단하기</h1>
+<p class="article-lead">저장소를 생성한 뒤에는 Claude를 활용하여 개발을 진행합니다. 개발 과정에서 Claude는 작업을 수행하기 전에 사용자에게 승인을 요청합니다. 요청 내용을 확인하고 적절한 응답을 선택하시기 바랍니다.</p>
+
+<div class="section">
+<h2 class="section-title">문항 1</h2>
+<div class="judge-card" data-correct="once" id="judge-q1">
+<div class="judge-head">실습 중 다음과 같은 승인 요청이 표시되었습니다</div>
+<div class="judge-body">
+<div class="claude-popup">
+<div class="claude-popup-bar"><span class="claude-dot"></span>Claude Code</div>
+<div class="claude-popup-body">
+<div class="claude-ask">Claude가 새 가상환경을 생성하고 pip를 준비하도록 허용하시겠습니까?</div>
+</div>
+</div>
+<div class="judge-opts">
+<button class="judge-opt" onclick="answerJudge('q1','allow',this)">항상 허용</button>
+<button class="judge-opt" onclick="answerJudge('q1','once',this)">이번만 허용</button>
+<button class="judge-opt" onclick="answerJudge('q1','deny',this)">거부</button>
+</div>
+<div class="judge-feedback" id="fb-q1"></div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2 class="section-title">문항 2</h2>
+<div class="judge-card" data-correct="allow" id="judge-q2">
+<div class="judge-head">실습 중 다음과 같은 승인 요청이 표시되었습니다</div>
+<div class="judge-body">
+<div class="claude-popup">
+<div class="claude-popup-bar"><span class="claude-dot"></span>Claude Code</div>
+<div class="claude-popup-body">
+<div class="claude-ask">Claude가 run Check git remote, hooks path, and user config하도록 허용하시겠습니까?</div>
+</div>
+</div>
+<div class="judge-opts">
+<button class="judge-opt" onclick="answerJudge('q2','allow',this)">항상 허용</button>
+<button class="judge-opt" onclick="answerJudge('q2','once',this)">이번만 허용</button>
+<button class="judge-opt" onclick="answerJudge('q2','deny',this)">거부</button>
+</div>
+<div class="judge-feedback" id="fb-q2"></div>
+</div>
+</div>
+</div>
+
+<div class="section">
+<h2 class="section-title">문항 3</h2>
+<div class="judge-card" data-correct="allow" id="judge-q3">
+<div class="judge-head">실습 중 다음과 같은 승인 요청이 표시되었습니다</div>
+<div class="judge-body">
+<div class="claude-popup">
+<div class="claude-popup-bar"><span class="claude-dot"></span>Claude Code</div>
+<div class="claude-popup-body">
+<div class="claude-ask">Claude가 Python 파일의 문법을 검사하도록 허용하시겠습니까?</div>
+</div>
+</div>
+<div class="judge-opts">
+<button class="judge-opt" onclick="answerJudge('q3','allow',this)">항상 허용</button>
+<button class="judge-opt" onclick="answerJudge('q3','once',this)">이번만 허용</button>
+<button class="judge-opt" onclick="answerJudge('q3','deny',this)">거부</button>
+</div>
+<div class="judge-feedback" id="fb-q3"></div>
+</div>
+</div>
+</div>
+
+<div class="article-nav">
+<button class="nav-btn" onclick="goPage('start')">이전</button>
+<button class="nav-btn primary" id="judge-next" disabled onclick="goPage('upload')">Chapter 03으로</button>
+</div>
+<div class="gate-msg" id="judge-gate">세 문항 모두 정답을 선택하면 다음 단계로 진행할 수 있습니다. 오답 시 다시 선택할 수 있습니다.</div>
+</article>
+</div>
+
+<!-- ============ UPLOAD (GitHub 2부) ============ -->
+<div class="page" id="page-upload">
+<article class="article" style="max-width:1080px">
+<div class="breadcrumb">DSR AI 기초교육 <span>/</span> 3단계 <span>/</span> Chapter 03</div>
+<h1 class="article-title">결과물 올리기</h1>
+<p class="article-lead">개발이 완료된 결과물은 GitHub 저장소에 업로드하여 사내 자산으로 보관합니다.<br/>Chapter 01에서 생성한 저장소에 파일을 올리고 커밋(등록)하는 절차를 진행합니다.</p>
+<div class="note-alert" id="uploadNotice"><div class="note-alert-label">안내</div><p>본 화면은 업로드 절차를 익히기 위한 연습 화면입니다.<br/>업로드하는 파일은 <b>내용과 형식에 관계없이 어떤 파일이어도 무방</b>합니다.</p></div>
+<div class="note" id="upload-lock" style="display:none"><div class="note-label">안내</div><p>Chapter 01에서 저장소를 먼저 생성하시기 바랍니다. <button class="nav-btn" onclick="goPage('start')" style="margin-left:6px;padding:5px 12px">Chapter 01로 이동</button></p></div>
+<div id="slot-upload"></div>
+<div class="article-nav">
+<button class="nav-btn" onclick="goPage('judge')">이전</button>
+<button class="nav-btn primary" disabled id="completeBtn" onclick="openCompletionModal()">교육 완료</button>
+</div>
+<div class="gate-msg" id="upload-gate">모든 과정을 완료하면 교육 완료 버튼이 활성화됩니다.</div>
+</article>
+</div>
+
+</div><!-- .main -->
+</div><!-- .layout -->
+
+<div aria-hidden="true" class="completion-modal" id="completionModal">
+<div aria-modal="true" class="completion-dialog" role="dialog">
+<div class="completion-kicker">EDUCATION COMPLETION</div>
+<h2 class="completion-title">교육 이수 정보 입력</h2>
+<p class="completion-desc">성명과 사번을 입력하면 교육 이수 기록이 제출됩니다.</p>
+<div class="completion-field"><label class="completion-label" for="employeeName">성명</label><input class="completion-input" id="employeeName" oninput="validateCompletionForm()" placeholder="성명 입력" type="text"/></div>
+<div class="completion-field"><label class="completion-label" for="employeeId">사번</label><input class="completion-input" id="employeeId" inputmode="numeric" oninput="validateCompletionForm()" placeholder="사번 입력" type="text"/></div>
+<div class="completion-result" id="completionResult"></div>
+<div class="completion-actions">
+<button class="modal-btn" id="cancelCompletionBtn" onclick="closeCompletionModal()" type="button">취소</button>
+<button class="modal-btn primary" disabled id="submitCompletionBtn" onclick="submitCompletion()" type="button">제출 완료</button>
+</div>
+</div>
+</div>
+
+<form aria-hidden="true" id="completionForm" method="post" style="display:none" target="submissionFrame">
+  <input name="recordId" type="hidden"/>
+  <input name="courseCode" type="hidden"/>
+  <input name="courseName" type="hidden"/>
+  <input name="employeeId" type="hidden"/>
+  <input name="employeeName" type="hidden"/>
+  <input name="score" type="hidden"/>
+  <input name="total" type="hidden"/>
+  <input name="passed" type="hidden"/>
+  <input name="clientSubmittedAt" type="hidden"/>
+  <input name="ip" type="hidden"/>
+  <input name="userAgent" type="hidden"/>
+  <input name="pageUrl" type="hidden"/>
+  <input name="version" type="hidden"/>
+  <input name="testMode" type="hidden"/>
+</form>
+<iframe id="submissionFrame" name="submissionFrame" onload="handleSubmissionFrameLoad()" style="display:none" title="교육 이수 기록 전송"></iframe>
+
+<script>
+/* ===== 설정 ===== */
+const COURSE_INFO={code:'DSR_AI_L3',name:'3단계 실습',version:'2026-10-08-submit-v1'};
+const APPS_SCRIPT_WEB_APP_URL='https://script.google.com/macros/s/AKfycbwAWpK9WvB6SohYIkWSWPj-Z8vGBTYs8QQ4eHaJhmV8B-OTa3KylAus6XaDM1aD6mLG/exec';
+const SUBMISSION_MESSAGE_TYPE='DSR_AI_SUBMISSION_RESULT';
+let submissionStarted=false;
+let submissionFinished=false;
+let submissionTimeout=null;
+let pendingRecordId='';
+let submissionSentAt=0;
+
+/* ===== 페이지 이동 ===== */
+const pages=['intro','start','judge','upload'];
+const pageTitles={intro:'시작하기 전',start:'Chapter 01 · 프로젝트 시작하기',judge:'Chapter 02 · 승인 요청 판단',upload:'Chapter 03 · 결과물 올리기'};
+const done={start:false,judge:false,upload:false};
+function goPage(id){
+  pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('active',p===id));
+  pages.forEach(p=>document.getElementById('nav-'+p).classList.toggle('active',p===id));
+  const idx=pages.indexOf(id), pct=Math.round(idx/(pages.length-1)*100);
+  document.getElementById('progress-label').textContent=pageTitles[id]+' · '+(idx+1)+' / '+pages.length;
+  document.getElementById('progress-percent').textContent=pct+'%';
+  document.getElementById('progress-fill').style.width=pct+'%';
+  if(id==='start')enterSim('start');
+  if(id==='upload')enterSim('upload');
+  setTimeout(updateGuide,60);
+  const notice=(id==='upload')?document.getElementById('uploadNotice'):null;
+  if(notice&&done.start)notice.scrollIntoView({behavior:'smooth',block:'start'});
+  else window.scrollTo({top:0,behavior:'smooth'});
+}
+function markDone(key){
+  done[key]=true;
+  refreshGates();
+}
+function renderSideStates(){
+  ['start','judge','upload'].forEach(k=>{
+    const el=document.getElementById('state-'+k); if(!el)return;
+    if(done[k]){el.textContent='완료';el.className='sidebar-state';}
+    else if(done.upload){el.textContent='미완료';el.className='sidebar-state todo';}
+    else{el.textContent='';el.className='sidebar-state';}
+  });
+}
+const CH_NAME={start:'Chapter 01 프로젝트 시작하기',judge:'Chapter 02 승인 요청 판단',upload:'Chapter 03 결과물 올리기'};
+function remaining(){return ['start','judge','upload'].filter(k=>!done[k]);}
+function refreshGates(){
+  renderSideStates();
+  const gate=(btnId,gateId,ok,okMsg,waitMsg)=>{
+    document.getElementById(btnId).disabled=!ok;
+    const g=document.getElementById(gateId); g.textContent=ok?okMsg:waitMsg; g.className='gate-msg'+(ok?' ready':'');
+  };
+  gate('start-next','start-gate',done.start,'저장소가 생성되었습니다. 다음 단계에서 개발 과정을 진행합니다.','저장소를 생성하면 다음 단계로 진행할 수 있습니다.');
+  gate('judge-next','judge-gate',done.judge,'세 문항 모두 정답입니다.','세 문항 모두 정답을 선택하면 다음 단계로 진행할 수 있습니다. 오답 시 다시 선택할 수 있습니다.');
+  const all=done.start&&done.judge&&done.upload;
+  const rest=[];
+  if(!done.start)rest.push('프로젝트 시작하기');
+  if(!done.judge)rest.push('승인 요청 판단');
+  if(!done.upload)rest.push('결과물 올리기');
+  gate('completeBtn','upload-gate',all,'모든 과정을 완료했습니다. 교육 완료 버튼을 눌러 이수 정보를 제출하시기 바랍니다.','');
+  if(!all){
+    const g=document.getElementById('upload-gate');
+    g.className='gate-msg'+(done.upload?' todo':'');
+    g.innerHTML='남은 과정: '+remaining().map(k=>'<button class="gate-link" onclick="goPage(\''+k+'\')">'+CH_NAME[k]+'</button>').join(', ');
+  }
+  if(typeof coachKey!=='undefined'&&coachKey==='done'){renderSuccess();setCoach('done');}
+}
+
+/* ===== Chapter 02 : 승인 요청 판단 ===== */
+const judgeAnswered={q1:false,q2:false,q3:false};
+const judgeFeedback={
+  q1:{correct:'once',
+      ok:'<b>정답입니다.</b><br/><b>실제 의미</b> · 프로젝트에 사용할 가상환경(.venv)을 만들고, 필요한 라이브러리를 설치할 준비를 하는 작업입니다.<br/><b>확인할 점</b> · 새 프로젝트의 개발환경을 준비하는 단계인지, 작업 경로가 현재 프로젝트와 맞는지 확인합니다. 폴더에 새로 파일이 생성되는 작업이므로, 이번만 허용을 선택하여 경로를 확인한 뒤 진행하는 것이 안전합니다.',
+      allow:'<b>다시 확인하시기 바랍니다.</b> 항상 허용으로 설정하면 이후 다른 경로에서도 확인 없이 폴더와 파일이 생성됩니다. 작업 경로가 현재 프로젝트와 맞는지 확인할 수 있도록 이번만 허용을 선택하는 것이 안전합니다.',
+      deny:'<b>다시 확인하시기 바랍니다.</b> 거부하면 가상환경이 생성되지 않아 라이브러리 설치와 이후 개발이 진행되지 않습니다. 작업 경로를 확인한 뒤 이번만 허용을 선택하시기 바랍니다.'},
+  q2:{correct:'allow',
+      ok:'<b>정답입니다.</b><br/><b>실제 의미</b> · 현재 프로젝트의 Git remote 주소, hooks 경로, 사용자 설정 값을 조회하는 작업입니다.<br/><b>확인할 점</b> · 설정 값을 조회만 하는 작업인지, 설정을 변경하는 작업인지 확인합니다. 조회만 하는 작업은 파일이 변경되거나 삭제되지 않으므로 항상 허용해도 안전합니다.',
+      once:'<b>오답은 아니지만, 더 적절한 선택이 있습니다.</b> 이 요청은 Git 설정 값을 조회만 하는 작업으로, 파일이 변경되거나 삭제되지 않습니다. 매번 확인할 필요가 없으므로 항상 허용하는 것이 효율적입니다.',
+      deny:'<b>다시 확인하시기 바랍니다.</b> 거부하면 Claude가 프로젝트 설정을 확인하지 못해 이후 작업이 중단됩니다. 이 요청은 설정 값을 조회만 하는 작업이므로 허용해도 안전합니다.'},
+  q3:{correct:'allow',
+      ok:'<b>정답입니다.</b><br/><b>실제 의미</b> · config.py, common.py처럼 수정한 Python 파일에 문법 오류가 없는지 확인하는 작업입니다.<br/><b>확인할 점</b> · 검사 대상이 현재 작업 중인 프로젝트의 파일인지 확인합니다. 파일을 읽어 확인만 하는 작업이므로 항상 허용해도 안전합니다.',
+      once:'<b>오답은 아니지만, 더 적절한 선택이 있습니다.</b> 문법 검사는 파일을 읽어 오류 여부만 확인하는 작업으로, 파일이 변경되지 않습니다. 개발 중 자주 반복되는 작업이므로 항상 허용하는 것이 효율적입니다.',
+      deny:'<b>다시 확인하시기 바랍니다.</b> 거부하면 문법 오류를 확인하지 못한 채 다음 단계로 넘어가게 됩니다. 파일을 읽어 확인만 하는 작업이므로 허용해도 안전합니다.'}
+};
+function answerJudge(q,val,btn){
+  const card=document.getElementById('judge-'+q), fb=document.getElementById('fb-'+q), info=judgeFeedback[q];
+  const ok=(val===info.correct);
+  card.querySelectorAll('.judge-opt').forEach(b=>{b.disabled=ok;b.classList.remove('picked-right','picked-wrong');});
+  btn.classList.add(ok?'picked-right':'picked-wrong');
+  fb.className='judge-feedback show '+(ok?'ok':'no');
+  fb.innerHTML=(ok?info.ok:info[val]+'<br/><b>다른 선택지를 선택하여 다시 응답하시기 바랍니다.</b>');
+  if(ok){judgeAnswered[q]=true; if(judgeAnswered.q1&&judgeAnswered.q2&&judgeAnswered.q3) markDone('judge');}
+}
+function retryJudge(q){
+  const card=document.getElementById('judge-'+q), fb=document.getElementById('fb-'+q);
+  card.querySelectorAll('.judge-opt').forEach(b=>{b.disabled=false;b.classList.remove('picked-right','picked-wrong');});
+  fb.className='judge-feedback';fb.innerHTML='';
+}
+
+/* ===== Chapter 01·03 : GitHub 시뮬레이터 ===== */
+const IC={
+  repo:'<svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 1.5h9v10h-8a1.5 1.5 0 0 0 0 3h8" fill="none" stroke="#59636e" stroke-width="1.3"/><path d="M3.5 1.5v11.5" stroke="#59636e" stroke-width="1.3"/></svg>',
+  lock:'<svg width="16" height="16" viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7.5" rx="1.5" fill="none" stroke="#59636e" stroke-width="1.3"/><path d="M5.2 7V5a2.8 2.8 0 0 1 5.6 0v2" fill="none" stroke="#59636e" stroke-width="1.3"/></svg>',
+  book:'<svg width="18" height="18" viewBox="0 0 16 16"><path d="M2 2.5h4.5A1.5 1.5 0 0 1 8 4v10a1.5 1.5 0 0 0-1.5-1.5H2zM14 2.5H9.5A1.5 1.5 0 0 0 8 4v10a1.5 1.5 0 0 1 1.5-1.5H14z" fill="none" stroke="#59636e" stroke-width="1.2"/></svg>',
+  folder:'<svg width="16" height="16" viewBox="0 0 16 16"><path d="M1.5 3h4.3l1.5 1.5h7.2v9H1.5z" fill="#54aeff"/></svg>',
+  file:'<svg width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 1.5h5.5l3.5 3.5v9.5h-9z" fill="none" stroke="#59636e" stroke-width="1.2"/><path d="M9 1.5V5h3.5" fill="none" stroke="#59636e" stroke-width="1.2"/></svg>'
+};
+const TABS=['Code','Issues','Pull requests','Actions','Projects','Security','Insights','Settings'];
+const TEMPLATE_FILES=[
+  {name:'.harness',dir:true,msg:'DSR 개발 규칙 hook 추가',time:'last month'},
+  {name:'AGENTS.md',msg:'AI 도구별 규칙 파일 추가',time:'last month'},
+  {name:'CLAUDE.md',msg:'AI 도구별 규칙 파일 추가',time:'last month'},
+  {name:'GEMINI.md',msg:'AI 도구별 규칙 파일 추가',time:'last month'},
+  {name:'README.md',msg:'README 템플릿 정리',time:'2 weeks ago'},
+  {name:'SECURITY.md',msg:'보안 규칙 문서 추가',time:'last month'}
+];
+const README_HTML='<h1>🚀 프로젝트 이름: [예: 법인카드 영수증 정산 자동화 도구]</h1><blockquote><p><b>한 줄 요약:</b> [예: PDF 영수증에서 날짜와 금액을 추출해 엑셀로 저장해주는 도구입니다.]</p></blockquote><h2>🤖 AI 도구 시작하기 (필독)</h2><p>이 프로젝트는 어떤 AI 도구를 사용하든 DSR 개발 규칙이 자동 또는 수동으로 적용됩니다.</p>';
+
+const gh={page:'tpl',owner:'my-account',name:'',desc:'',vis:'public',files:[],commit:'',commitDesc:'',sha:'',committed:false};
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function sha(){return Math.random().toString(16).slice(2,9);}
+function fmtSize(b){if(b==null)return'';if(b<1024)return b+' Bytes';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB';}
+
+function initStatic(){
+  document.querySelectorAll('[data-tabs]').forEach(el=>{
+    el.innerHTML=TABS.map((t,i)=>'<div class="g-rtab'+(i===0?' on':'')+'"'+(i===0?'':' data-inert="'+t+' 메뉴는 본 연습에서 사용하지 않습니다. 상단 안내에 따라 진행하시기 바랍니다."')+'>'+esc(t)+'</div>').join('');
+  });
+  document.querySelectorAll('[data-ic]').forEach(el=>{el.innerHTML=IC[el.dataset.ic]||'';});
+  document.querySelectorAll('[data-readme]').forEach(el=>{el.innerHTML=README_HTML;});
+  document.getElementById('tplFiles').innerHTML=fileTable(TEMPLATE_FILES,{who:'DSR-IT',msg:'README 템플릿 정리',sha:'a3f9c1e',time:'2 weeks ago',count:'12 Commits'});
+}
+function fileTable(list,last){
+  const head='<div class="g-lastc"><span class="av">'+esc(last.who.slice(0,3))+'</span><span class="who">'+esc(last.who)+'</span><span class="msg">'+esc(last.msg)+'</span><span class="sha">'+esc(last.sha)+' · '+esc(last.time)+'</span><span class="commits">'+esc(last.count)+'</span></div>';
+  const rows=list.map(f=>'<div class="g-row'+(f.isNew?' new':'')+'">'+(f.dir?IC.folder:IC.file)+'<span class="nm" data-inert="">'+esc(f.name)+'</span><span class="cm">'+esc(f.msg)+'</span><span class="tm">'+esc(f.time)+'</span></div>').join('');
+  return head+rows;
+}
+
+let simMode='start';
+const COACH={
+  tpl:[1,'사내 템플릿 저장소 화면입니다. 모든 신규 프로젝트는 이 템플릿에서 시작합니다. 초록색 <b>Use this template</b> 버튼을 클릭한 뒤 <b>Create a new repository</b>를 선택합니다.'],
+  new:[2,'새 저장소 정보를 입력합니다. 기본값이 <b>개인 계정·Public</b>으로 설정되어 있으므로, <b>Owner를 DSR-family</b>로 변경하고 <b>Private</b>을 선택합니다. 저장소 이름은 <b>영문</b>으로 입력합니다.'],
+  gen:[2,'저장소를 생성하고 있습니다. 잠시 기다려 주시기 바랍니다.'],
+  created:[3,'저장소가 생성되었습니다. 템플릿의 규칙 파일(CLAUDE.md 등)이 함께 포함된 것을 확인할 수 있습니다. 아래 초록색 안내의 <b>Chapter 02로 이동</b> 버튼을 클릭합니다.'],
+  repo:[1,'Chapter 01에서 생성한 저장소입니다. 개발 결과물을 업로드하기 위해 <b>Add file</b> → <b>Upload files</b>를 선택합니다.'],
+  up:[2,'업로드할 파일을 끌어다 놓거나 <b>choose your files</b>를 클릭하여 선택합니다. 파일은 어떤 것이어도 무방합니다. 이후 하단 입력란에 <b>업로드 내용을 한 줄로</b> 입력하고 <b>Commit changes</b>를 클릭합니다.'],
+  done:[3,'업로드가 완료되었습니다. 업로드한 파일은 초록색으로 표시되며, 입력한 커밋 메시지가 상단에 표시됩니다. 아래 초록색 안내의 <b>교육 완료</b> 버튼을 클릭합니다.']
+};
+const STEPS={start:['템플릿에서 시작','저장소 만들기','생성 확인'],upload:['파일 올리기 메뉴','파일 선택·커밋','결과 확인']};
+const FINAL_KEYS=['created','done'];
+
+function setCoach(key){
+  const c=COACH[key];
+  document.getElementById('coachNum').textContent=c[0];
+  document.getElementById('coachText').innerHTML=c[1];
+  coachKey=key;
+  if(key==='done'){
+    const r=remaining();
+    if(r.length){document.getElementById('coachText').innerHTML='업로드가 완료되었으나, 완료되지 않은 과정이 있어 교육 완료 버튼이 활성화되지 않았습니다. 남은 과정: <b>'+r.map(k=>CH_NAME[k]).join(', ')+'</b>. 아래 안내의 버튼 또는 좌측 메뉴를 통해 해당 챕터를 완료하시기 바랍니다.';}
+  }
+  const n=c[0], fin=FINAL_KEYS.includes(key);
+  document.getElementById('simSteps').innerHTML=STEPS[simMode].map((t,i)=>{
+    const k=i+1, cls=(k<n||(fin&&k===n))?' done':(k===n?' active':'');
+    return '<div class="sim-step'+cls+'">'+k+' · '+t+'</div>';
+  }).join('');
+  updateGuide();
+}
+/* 지금 눌러야 할 곳 하나만 강조 + 말풍선 */
+let coachKey='tpl';
+function currentTarget(){
+  const menuOpen=id=>document.getElementById(id).classList.contains('open');
+  switch(coachKey){
+    case 'tpl': return menuOpen('tplMenu')?['tplCreate','Create a new repository 선택','left']:['tplBtn','Use this template 클릭','below'];
+    case 'new':
+      if(document.getElementById('gOwner').value!=='DSR-family')return['gOwner','Owner를 DSR-family로 변경','above'];
+      if(!gh.name)return['gName','저장소 이름 입력 (영문)','above'];
+      if(document.querySelector('input[name="gvis"]:checked').value!=='private')return['gVisPri','Private 선택','inright'];
+      return['gCreate','Create repository 클릭','above'];
+    case 'created': return['gSuccessBtn',null];
+    case 'repo': return menuOpen('addMenu')?['addUpload','Upload files 선택','left']:['addBtn','Add file 클릭','below'];
+    case 'up':
+      if(!gh.files.length)return['gDrop','파일 끌어다 놓기 또는 choose your files 클릭','below'];
+      if(document.getElementById('gMsg').value.trim().length<2)return['gMsg','커밋 메시지 입력','above'];
+      return['gCommit','Commit changes 클릭','below'];
+    case 'done': return['gSuccessBtn',null];
+  }
+  return[null,null];
+}
+function updateGuide(){
+  document.querySelectorAll('.coach-target').forEach(el=>el.classList.remove('coach-target'));
+  const co=document.getElementById('gCallout'); co.className='g-callout';
+  const [id,label,side]=currentTarget(); if(!id)return;
+  const el=document.getElementById(id); if(!el)return;
+  el.classList.add('coach-target');
+  if(!label)return;
+  const wrap=document.getElementById('gwrap'), wr=wrap.getBoundingClientRect(), r=el.getBoundingClientRect();
+  if(!r.width||!wr.width)return;
+  document.getElementById('gCalloutText').textContent=label;
+  let x,y;
+  if(side==='inright'){co.style.left=(r.right-wr.left-18)+'px';co.style.top=(r.top-wr.top+r.height/2)+'px';co.className='g-callout show inright';return;}
+  if(side==='left'){x=r.left-wr.left-14;y=r.top-wr.top+r.height/2;}
+  else if(side==='above'){x=r.left-wr.left+r.width/2;y=r.top-wr.top-14;}
+  else{x=r.left-wr.left+r.width/2;y=r.bottom-wr.top+14;
+    if(y>wr.height-56){y=r.top-wr.top-14;side='above';}}
+  if(side!=='left')x=Math.max(130,Math.min(Math.max(130,wr.width-130),x));
+  else if(x<200){x=r.left-wr.left+r.width/2;y=r.bottom-wr.top+14;co.className='g-callout show below';co.style.left=x+'px';co.style.top=y+'px';return;}
+  co.style.left=x+'px';co.style.top=y+'px';
+  co.className='g-callout show '+(side||'below');
+}
+window.addEventListener('resize',()=>updateGuide());
+function setUrl(){
+  const u=document.getElementById('urlbar'), base='github.com/'+gh.owner+'/'+gh.name;
+  u.textContent={tpl:'github.com/DSR-family/dsr-template',new:'github.com/new?template_name=dsr-template&template_owner=DSR-family',gen:'github.com/new?template_name=dsr-template&template_owner=DSR-family',repo:base,up:base+'/upload/main'}[gh.page];
+}
+function enterSim(mode){
+  simMode=mode;
+  const block=document.getElementById('simBlock');
+  if(mode==='upload'){
+    const locked=!done.start;
+    document.getElementById('upload-lock').style.display=locked?'block':'none';
+    if(locked){document.getElementById('slot-start').appendChild(block);return;}
+    document.getElementById('slot-upload').appendChild(block);
+    goGh('repo',true);
+  }else{
+    document.getElementById('slot-start').appendChild(block);
+    if(done.start){goGh('repo',true);}
+    else{showPage(gh.page);setUrl();setCoach(gh.page);}
+  }
+}
+function goGh(p,noScroll){
+  closeMenus();
+  if(p==='up'&&(!gh.name||simMode!=='upload'))return;
+  gh.page=p; showPage(p);
+  if(p==='repo')renderRepo();
+  if(p==='up')renderUpload();
+  setUrl();
+  let key=p;
+  if(p==='repo')key=(simMode==='start')?'created':(gh.committed?'done':'repo');
+  setCoach(key);
+  if(!noScroll)document.getElementById('simBlock').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showPage(p){document.querySelectorAll('#gwrap .g-page').forEach(el=>el.classList.toggle('on',el.id==='gp-'+p));}
+
+/* 메뉴 */
+function toggleMenu(id,e){
+  e.stopPropagation();
+  if(id==='addMenu'&&simMode==='start'){closeMenus();toast('파일 업로드는 개발 완료 후 Chapter 03에서 진행합니다. 하단의 Chapter 02로 버튼을 클릭하시기 바랍니다.');return;}
+  const m=document.getElementById(id), open=!m.classList.contains('open');
+  closeMenus(); if(open)m.classList.add('open');
+  updateGuide();
+}
+function closeMenus(){
+  const had=document.querySelectorAll('#gwrap .g-menu.open').length;
+  document.querySelectorAll('#gwrap .g-menu.open').forEach(m=>m.classList.remove('open'));
+  if(had)updateGuide();
+}
+document.addEventListener('click',closeMenus);
+
+/* 토스트 + 비활성 요소 */
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('gToast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+document.getElementById('gwrap').addEventListener('click',e=>{
+  const el=e.target.closest('[data-inert]');
+  if(!el)return;
+  e.preventDefault();e.stopPropagation();closeMenus();
+  toast(el.dataset.inert||'본 연습 화면에서는 사용하지 않는 기능입니다. 상단 안내에 따라 진행하시기 바랍니다.');
+});
+
+/* 저장소 생성 폼 */
+function validateNew(){
+  const ownerSel=document.getElementById('gOwner'), nameIn=document.getElementById('gName');
+  const nameMsg=document.getElementById('gNameMsg'), ownerMsg=document.getElementById('gOwnerMsg'), visMsg=document.getElementById('gVisMsg');
+  gh.owner=ownerSel.value;
+  gh.vis=document.querySelector('input[name="gvis"]:checked').value;
+  const raw=nameIn.value.trim().replace(/\s+/g,'-');
+  let nameOk=false;
+  nameIn.classList.remove('bad');
+  if(!raw){nameMsg.innerHTML='';}
+  else if(/[^\x00-\x7F]/.test(raw)){nameMsg.innerHTML='<div class="g-err">Repository name(저장소 이름)은 영문으로 입력해야 합니다. 한글은 사용할 수 없습니다.</div>';nameIn.classList.add('bad');}
+  else if(/[^0-9a-zA-Z._-]/.test(raw)){nameMsg.innerHTML='<div class="g-err">영문, 숫자, 하이픈(-), 밑줄(_), 마침표(.)만 사용할 수 있습니다.</div>';nameIn.classList.add('bad');}
+  else if(raw.toLowerCase()==='dsr-template'){nameMsg.innerHTML='<div class="g-err">템플릿과 동일한 이름은 사용할 수 없습니다. 프로젝트에 맞는 이름을 입력하시기 바랍니다.</div>';nameIn.classList.add('bad');}
+  else{
+    nameOk=true;
+    nameMsg.innerHTML='<div class="g-ok">✓ '+esc(raw)+' is available.</div>'+(raw!==nameIn.value.trim()?'<div class="g-note">Your new repository will be created as <b>'+esc(raw)+'</b>.</div>':'');
+  }
+  gh.name=nameOk?raw:'';
+  const ownerOk=(gh.owner==='DSR-family');
+  ownerSel.classList.toggle('bad',!ownerOk);
+  ownerMsg.textContent=ownerOk?'':'사내 프로젝트는 DSR-family 조직에 생성해야 합니다. Owner를 DSR-family로 변경하시기 바랍니다.';
+  const visOk=(gh.vis==='private');
+  document.getElementById('gVisPub').classList.toggle('bad',!visOk);
+  visMsg.textContent=visOk?'':'사내 규칙에 따라 저장소는 반드시 Private으로 생성해야 합니다.';
+  document.getElementById('gCreate').disabled=!(nameOk&&ownerOk&&visOk);
+  updateGuide();
+}
+function createRepo(){
+  if(document.getElementById('gCreate').disabled)return;
+  gh.desc=document.getElementById('gDesc').value.trim();gh.sha=sha();
+  gh.page='gen';showPage('gen');setUrl();setCoach('gen');
+  document.getElementById('genText').textContent='DSR-family/dsr-template → '+gh.owner+'/'+gh.name;
+  setTimeout(()=>{goGh('repo');markDone('start');},1600);
+}
+
+/* 저장소 화면 상단 완료 안내 */
+function renderSuccess(){
+  const box=document.getElementById('gSuccess'); if(!box)return;
+  if(gh.page!=='repo'){box.className='g-success';return;}
+  let html='';
+  if(simMode==='start'){
+    html='<div class="g-success-ic">✓</div><div class="g-success-body"><div class="g-success-title">저장소가 생성되었습니다</div><div class="g-success-desc"><b>'+esc(gh.owner+'/'+gh.name)+'</b> 저장소에 사내 템플릿의 규칙 파일(CLAUDE.md 등)이 함께 포함되었습니다. 실제 실습에서는 이 저장소를 내 컴퓨터로 복사(Clone)하여 개발을 시작합니다.</div><button class="g-success-btn" id="gSuccessBtn" onclick="goPage(\'judge\')">Chapter 02로 이동 →</button></div>';
+  }else if(gh.committed){
+    const r=remaining();
+    const btn=r.length?'<button class="g-success-btn todo" id="gSuccessBtn" onclick="goPage(\''+r[0]+'\')">남은 과정: '+CH_NAME[r[0]]+' →</button>'
+                     :'<button class="g-success-btn" id="gSuccessBtn" onclick="openCompletionModal()">교육 완료 →</button>';
+    html='<div class="g-success-ic">✓</div><div class="g-success-body"><div class="g-success-title">결과물 업로드가 완료되었습니다</div><div class="g-success-desc">파일 '+gh.files.length+'개를 업로드했습니다. 커밋 메시지: “'+esc(gh.commit)+'”<br/>업로드한 파일은 아래 목록에 초록색으로 표시됩니다.</div>'+btn+'</div>';
+  }
+  box.innerHTML=html; box.className='g-success'+(html?' show':'');
+}
+/* 저장소 화면 */
+function renderRepo(){
+  document.getElementById('repoCrumb').innerHTML=esc(gh.owner)+' / <b>'+esc(gh.name)+'</b>';
+  document.getElementById('repoTitle').textContent=gh.name;
+  document.getElementById('repoAbout').textContent=gh.desc||'No description, website, or topics provided.';
+  let list, last;
+  if(!gh.committed){
+    const age=(simMode==='start')?'1 minute ago':'3 days ago';
+    list=TEMPLATE_FILES.map(f=>({name:f.name,dir:f.dir,msg:'Initial commit',time:age}));
+    last={who:'ME',msg:'Initial commit',sha:gh.sha,time:age,count:'1 Commit'};
+  }else{
+    const tpl=TEMPLATE_FILES.map(f=>({name:f.name,dir:f.dir,msg:'Initial commit',time:'3 days ago'}));
+    const up=gh.files.filter(f=>!tpl.some(t=>t.name===f.name)).map(f=>({name:f.name,msg:gh.commit,time:'now',isNew:true}));
+    const dirs=tpl.filter(f=>f.dir), files=tpl.filter(f=>!f.dir).concat(up);
+    files.sort((a,b)=>a.name.localeCompare(b.name,'en',{sensitivity:'base'}));
+    list=dirs.concat(files);
+    last={who:'ME',msg:gh.commit,sha:gh.sha,time:'now',count:'2 Commits'};
+  }
+  document.getElementById('repoFiles').innerHTML=fileTable(list,last);
+  renderSuccess();
+}
+
+/* 업로드 */
+function renderUpload(){
+  document.getElementById('upCrumb').innerHTML=esc(gh.owner)+' / <b>'+esc(gh.name)+'</b>';
+  document.getElementById('upRepoLink').textContent=gh.name;
+  renderUpList();
+}
+function pushFile(name,size){
+  name=String(name).trim(); if(!name)return;
+  if(gh.files.some(f=>f.name===name)){toast(name+' 파일은 이미 추가되어 있습니다.');return;}
+  gh.files.push({name:name,size:size});
+}
+function addRealFiles(list){Array.from(list||[]).forEach(f=>pushFile(f.name,f.size));renderUpList();}
+function addManual(){const i=document.getElementById('gManual');pushFile(i.value,null);i.value='';renderUpList();}
+function delUp(i){gh.files.splice(i,1);renderUpList();}
+function renderUpList(){
+  document.getElementById('gUpList').innerHTML=gh.files.map((f,i)=>'<div class="g-upitem">'+IC.file+'<span class="n">'+esc(f.name)+'</span><span class="s">'+fmtSize(f.size)+'</span><button onclick="delUp('+i+')" title="Remove">×</button></div>').join('');
+  document.getElementById('gDrop').style.borderRadius=gh.files.length?'6px 6px 0 0':'6px';
+  validateCommit();
+}
+function validateCommit(){
+  gh.commit=document.getElementById('gMsg').value.trim();
+  document.getElementById('gCommit').disabled=!(gh.files.length>0);
+  updateGuide();
+}
+function doCommit(){
+  const err=document.getElementById('gMsgErr');
+  if(!gh.files.length)return;
+  if(gh.commit.length<2){err.textContent='업로드 내용을 한 줄로 입력하시기 바랍니다. 예: 매출 집계 프로그램 추가';document.getElementById('gMsg').focus();return;}
+  err.textContent='';
+  if(document.querySelector('input[name="gbr"]:checked').value!=='main'){toast('본 연습에서는 main 브랜치에 바로 커밋합니다. 상단 옵션을 선택하시기 바랍니다.');return;}
+  gh.commitDesc=document.getElementById('gMsgDesc').value.trim();
+  gh.sha=sha(); gh.committed=true;
+  goGh('repo');
+  markDone('upload');
+}
+(function(){
+  const dz=document.getElementById('gDrop');
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
+  dz.addEventListener('drop',e=>addRealFiles(e.dataTransfer.files));
+  window.addEventListener('dragover',e=>e.preventDefault());
+  window.addEventListener('drop',e=>e.preventDefault());
+})();
+
+/* ===== 이수 제출 ===== */
+function createRecordId(){
+  if(window.crypto&&typeof window.crypto.randomUUID==='function')return window.crypto.randomUUID();
+  return 'rec-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+}
+function isAppsScriptConfigured(){
+  return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/.test(APPS_SCRIPT_WEB_APP_URL);
+}
+function isCourseAllComplete(){
+  return Boolean(done.start&&done.judge&&done.upload);
+}
+function openCompletionModal(){
+  const modal=document.getElementById('completionModal');
+  const result=document.getElementById('completionResult');
+  const submitBtn=document.getElementById('submitCompletionBtn');
+  const cancelBtn=document.getElementById('cancelCompletionBtn');
+  if(!modal)return;
+
+  submissionStarted=false;
+  submissionFinished=false;
+  pendingRecordId='';
+  window.clearTimeout(submissionTimeout);
+
+  if(result){
+    result.textContent='';
+    result.className='completion-result';
+  }
+  if(submitBtn){
+    submitBtn.textContent='제출 완료';
+    submitBtn.onclick=submitCompletion;
+  }
+  if(cancelBtn){
+    cancelBtn.style.display='';
+    cancelBtn.disabled=false;
+    cancelBtn.textContent='취소';
+  }
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  validateCompletionForm();
+  setTimeout(()=>document.getElementById('employeeName')?.focus(),50);
+}
+function closeCompletionModal(){
+  if(submissionStarted&&!submissionFinished)return;
+  const modal=document.getElementById('completionModal');
+  if(!modal)return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+}
+function validateCompletionForm(){
+  const name=document.getElementById('employeeName')?.value.trim()||'';
+  const employeeId=document.getElementById('employeeId')?.value.trim()||'';
+  const submitBtn=document.getElementById('submitCompletionBtn');
+  if(submitBtn&&!submissionFinished)submitBtn.disabled=submissionStarted||!name||!employeeId;
+  return Boolean(name&&employeeId);
+}
+function setCompletionResult(message,type){
+  const result=document.getElementById('completionResult');
+  if(!result)return;
+  result.textContent=message;
+  result.className='completion-result show '+type;
+}
+function fillSubmissionForm(record){
+  const form=document.getElementById('completionForm');
+  if(!form)return null;
+  Object.entries(record).forEach(([key,value])=>{
+    const input=form.elements.namedItem(key);
+    if(input)input.value=String(value??'');
+  });
+  return form;
+}
+function setSubmittingState(isSubmitting){
+  submissionStarted=isSubmitting;
+  const submitBtn=document.getElementById('submitCompletionBtn');
+  if(submitBtn){
+    submitBtn.disabled=isSubmitting;
+    submitBtn.textContent=isSubmitting?'제출 중입니다...':'제출 완료';
+  }
+  const cancelBtn=document.getElementById('cancelCompletionBtn');
+  if(cancelBtn)cancelBtn.disabled=isSubmitting;
+}
+function finishSubmission(payload){
+  submissionFinished=true;
+  submissionStarted=false;
+  window.clearTimeout(submissionTimeout);
+
+  const duplicateText=payload&&payload.duplicate
+    ?' 동일한 사번으로 같은 회차를 제출한 기록이 있어 중복 제출로 저장되었습니다.'
+    :'';
+  setCompletionResult('교육 이수가 완료되었습니다.'+duplicateText,'success');
+
+  const submitBtn=document.getElementById('submitCompletionBtn');
+  const cancelBtn=document.getElementById('cancelCompletionBtn');
+  if(submitBtn){
+    submitBtn.disabled=false;
+    submitBtn.textContent='확인';
+    submitBtn.onclick=confirmCompletionAndClose;
+  }
+  if(cancelBtn)cancelBtn.style.display='none';
+}
+function failSubmission(message){
+  submissionStarted=false;
+  submissionFinished=false;
+  window.clearTimeout(submissionTimeout);
+  pendingRecordId='';
+  setCompletionResult(message||'제출 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.','error');
+  const cancelBtn=document.getElementById('cancelCompletionBtn');
+  if(cancelBtn)cancelBtn.disabled=false;
+  validateCompletionForm();
+}
+function submitCompletion(){
+  if(!validateCompletionForm()||submissionStarted||submissionFinished)return;
+  if(!isCourseAllComplete()){
+    setCompletionResult('세 가지 실습 과정을 모두 완료한 후 제출해 주세요.','error');
+    return;
+  }
+  if(!isAppsScriptConfigured()){
+    setCompletionResult('제출 설정을 확인할 수 없습니다. 담당자에게 문의해 주세요.','error');
+    return;
+  }
+
+  const record={
+    recordId:createRecordId(),
+    courseCode:COURSE_INFO.code,
+    courseName:COURSE_INFO.name,
+    employeeId:document.getElementById('employeeId').value.trim(),
+    employeeName:document.getElementById('employeeName').value.trim(),
+    score:3,
+    total:3,
+    passed:'Y',
+    clientSubmittedAt:new Date().toISOString(),
+    ip:'',
+    userAgent:navigator.userAgent,
+    pageUrl:location.href,
+    version:COURSE_INFO.version,
+    testMode:'N'
+  };
+
+  const form=fillSubmissionForm(record);
+  if(!form){
+    failSubmission('제출 준비 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    return;
+  }
+
+  pendingRecordId=record.recordId;
+  setSubmittingState(true);
+  setCompletionResult('제출 중입니다. 잠시만 기다려 주세요.','success');
+  form.action=APPS_SCRIPT_WEB_APP_URL;
+  submissionSentAt=Date.now();
+
+  try{
+    form.submit();
+  }catch(error){
+    failSubmission('제출 중 문제가 발생했습니다. 네트워크 연결을 확인한 후 다시 시도해 주세요.');
+    return;
+  }
+
+  submissionTimeout=window.setTimeout(()=>{
+    if(!submissionFinished){
+      failSubmission('제출 확인이 지연되고 있습니다. 잠시 후 다시 시도해 주세요.');
+    }
+  },15000);
+}
+function handleSubmissionFrameLoad(){
+  if(!submissionStarted||submissionFinished||!pendingRecordId)return;
+
+  const elapsed=Date.now()-submissionSentAt;
+  const delay=Math.max(0,800-elapsed);
+  window.setTimeout(()=>{
+    if(submissionStarted&&!submissionFinished&&pendingRecordId){
+      finishSubmission({ok:true,recordId:pendingRecordId,duplicate:false});
+    }
+  },delay);
+}
+function handleSubmissionMessage(event){
+  const data=event.data;
+  if(!data||data.type!==SUBMISSION_MESSAGE_TYPE)return;
+  if(!submissionStarted||submissionFinished)return;
+  if(!pendingRecordId||data.recordId!==pendingRecordId)return;
+
+  if(data.ok===true){
+    finishSubmission(data);
+  }else{
+    failSubmission(data.message||'제출 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+  }
+}
+function confirmCompletionAndClose(){
+  if(!submissionFinished)return;
+  window.close();
+  window.setTimeout(()=>{
+    if(!window.closed){
+      closeCompletionModal();
+      alert('교육 이수가 완료되었습니다. 브라우저에서 현재 교육 창을 닫아 주세요.');
+    }
+  },250);
+}
+window.addEventListener('message',handleSubmissionMessage);
+window.addEventListener('keydown',event=>{
+  if(event.key==='Escape')closeCompletionModal();
+});
+
+initStatic();enterSim('start');refreshGates();
+</script>
+
+</body>
+</html>
